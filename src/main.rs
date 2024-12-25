@@ -8,8 +8,9 @@ use bevy::prelude::*;
 use camera::CameraPlugin;
 use debug::DebugPlugin;
 use enemies::EnemyPlugin;
+use leafwing_input_manager::prelude::*;
 use movement::MovementPlugin;
-use player::PlayerPlugin;
+use player::{PlayerAction, PlayerPlugin};
 
 fn main() {
     App::new()
@@ -27,5 +28,6 @@ fn main() {
         .add_plugins(PlayerPlugin)
         .add_plugins(EnemyPlugin)
         .add_plugins(CameraPlugin)
+        .add_plugins(InputManagerPlugin::<PlayerAction>::default())
         .run();
 }

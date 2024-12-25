@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::movement::Velocity;
 
 const STARTING_TRANSLATION: Vec3 = Vec3::new(5.0, 0.0, 5.0);
-const STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 0.0);
+const STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 1.0);
 
 #[derive(Component)]
 pub struct Enemy;
