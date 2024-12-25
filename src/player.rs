@@ -1,6 +1,5 @@
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
-use ops::atan2;
 
 use crate::movement::Velocity;
 
@@ -147,4 +146,4 @@ fn player_movement(
     // let net_direction = Dir2::new(direction_vector);
     player_velocity.value = Vec3::new(direction_vector.x * 5.0, 0.0, direction_vector.y * 5.0);
 }
-fn player_shoots() {}
+// fn player_shoots() {}
