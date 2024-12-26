@@ -38,7 +38,8 @@ fn spawn_enemy(mut commands: Commands, asset_server: Res<AssetServer>) {
         ),
         velocity: {
             Velocity {
-                value: STARTING_VELOCITY,
+                linvel: STARTING_VELOCITY,
+                angvel: Vec3::ZERO,
             }
         },
         // SceneBundle -> SceneRoot https://bevyengine.org/learn/migration-guides/0-14-to-0-15/#migrate-scenes-to-required-components

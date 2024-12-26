@@ -2,7 +2,6 @@ use crate::{movement::Velocity, player::Player};
 use bevy::prelude::*;
 
 const CAMERA_DISTANCE: f32 = 30.0;
-const STARTING_CAMERA_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 0.0);
 
 #[derive(Component)]
 struct Camera;
@@ -23,7 +22,8 @@ fn spawn_camera(mut commands: Commands) {
             Camera3d::default(),
             Transform::from_xyz(0.0, CAMERA_DISTANCE, 0.0).looking_at(Vec3::ZERO, Vec3::Z),
             Velocity {
-                value: STARTING_CAMERA_VELOCITY,
+                linvel: Vec3::ZERO,
+                angvel: Vec3::ZERO,
             },
         ),
     );
@@ -36,7 +36,7 @@ fn follow_player(
     // https://www.reddit.com/r/bevy/comments/1afnv3s/comment/kobak7r/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
     for mut camera_velocity in &mut query_camera {
         for player_velocity in &query_player {
-            camera_velocity.value = player_velocity.value;
+            camera_velocity.linvel = player_velocity.linvel;
         }
     }
 }
