@@ -1,10 +1,10 @@
 use bevy::prelude::*;
-
+use std::f32::consts::TAU;
 // TODO: Understand derive Debug
 #[derive(Component, Debug)]
 pub struct Velocity {
     pub linvel: Vec3,
-    pub angvel: Vec3,
+    pub angvel: Quat,
 }
 
 pub struct MovementPlugin;
@@ -25,8 +25,6 @@ fn update_position(mut query: Query<(&Velocity, &mut Transform)>, time: Res<Time
 fn update_rotation(mut query: Query<(&Velocity, &mut Transform)>, time: Res<Time>) {
     for (velocity, mut transform) in query.iter_mut() {
         // FIXME: Allow for rotation via input from angvel
-        // transform.rotation += velocity.angvel.y * time.delta_secs();
+        transform.rotate_y(velocity.angvel.y * time.delta_secs())
     }
 }
-
-fn decay_velocity() {}

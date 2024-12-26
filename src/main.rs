@@ -5,7 +5,12 @@ mod movement;
 mod player;
 mod world;
 
-use bevy::prelude::*;
+use bevy::log::LogPlugin;
+use bevy::{
+    prelude::*,
+    remote::{http::RemoteHttpPlugin, RemotePlugin},
+};
+
 use camera::CameraPlugin;
 use debug::DebugPlugin;
 use enemies::EnemyPlugin;
@@ -24,8 +29,11 @@ fn main() {
         })
         // Built in plugins
         .add_plugins(DefaultPlugins) // Default Plugins required to run game
+        // Plugins required for VSCode Bevy Inspector
+        .add_plugins(RemotePlugin::default())
+        .add_plugins(RemoteHttpPlugin::default())
         // User configured plugins.
-        .add_plugins(DebugPlugin)
+        // .add_plugins(DebugPlugin)
         .add_plugins(MovementPlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(EnemyPlugin)
