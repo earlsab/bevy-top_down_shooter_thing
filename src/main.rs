@@ -3,6 +3,7 @@ mod debug;
 mod enemies;
 mod movement;
 mod player;
+mod world;
 
 use bevy::prelude::*;
 use camera::CameraPlugin;
@@ -11,6 +12,7 @@ use enemies::EnemyPlugin;
 use leafwing_input_manager::prelude::*;
 use movement::MovementPlugin;
 use player::{PlayerAction, PlayerPlugin};
+use world::WorldPlugin;
 
 fn main() {
     App::new()
@@ -28,6 +30,7 @@ fn main() {
         .add_plugins(PlayerPlugin)
         .add_plugins(EnemyPlugin)
         .add_plugins(CameraPlugin)
+        .add_plugins(WorldPlugin)
         .add_plugins(InputManagerPlugin::<PlayerAction>::default())
         .run();
 }
