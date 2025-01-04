@@ -180,12 +180,21 @@ fn player_rotates_to_mouse_cursor(
     let (mut player_transform, mut player_velocity, world_cursor_position) = query.single_mut();
     // Still can't understand why this isn't working.
     // TODO: Allow Player to Rotate to Mouse Cursor
-    player_transform.rotate_y(0.005);
+    // player_transform.rotate_y(0.005);
+
+    let player_pos = player_transform.translation.truncate();
+    let world_cursor_pos: Vec3 = Vec3::new(
+        world_cursor_position.position.x,
+        0.0,
+        world_cursor_position.position.y,
+    );
+    // player_transform.rotation.w = player_pos.angle_to(world_cursor_pos);
+    *player_transform = player_transform.looking_at(world_cursor_pos, Vec3::Y);
+    // info!("{:?}", player_velocity.angvel.y);
 }
 
 // fn player_shoots() {}
 
-// FIXME: Fix this mess.
 fn cursor_position(
     mut query_player: Query<&mut CursorPosition, With<Player>>,
     q_windows: Query<&Window, With<PrimaryWindow>>,
@@ -197,21 +206,56 @@ fn cursor_position(
     // Games typically only have one window (the primary window)
     if let Some(position) = window.cursor_position() {
         world_cursor_position.position = window_to_world(&window, &camera_transform, &position);
+        // info!("{:?}", world_cursor_position.position);
     } else {
-        println!("Cursor is not in the game window.");
+        // println!("Cursor is not in the game window.");
     }
 }
+// FIXME: Fix this mess.
+// fn cursor_position(
+//     mut query_player: Query<&mut CursorPosition, With<Player>>,
+//     q_windows: Query<&Window, With<PrimaryWindow>>,
+//     q_camera: Query<(&Transform, &Camera3d), With<Camera>>,
+// ) {
+//     let mut screen_cursor_position = query_player.single_mut();
+//     let window = q_windows.single();
+//     let (camera_transform, camera) = q_camera.single();
+//     // Games typically only have one window (the primary window)
+//     if let Some(position) = window.cursor_position() {
+//         screen_cursor_position.position = window_to_world(&window, &camera_transform, &position);
+//     } else {
+//         println!("Cursor is not in the game window.");
+//     }
+// }
 
-// https://stackoverflow.com/a/65437868
-// TODO: Understand how this works. Assess if necessary.
-fn window_to_world(window: &Window, camera: &Transform, position: &Vec2) -> Vec2 {
-    let center = camera.translation.truncate();
-    let half_width = (window.width() / 2.0) * camera.scale.x;
-    let half_height = (window.height() / 2.0) * camera.scale.y;
-    let left = center.x - half_width;
-    let bottom = center.y - half_height;
-    Vec2::new(
-        left + position.x * camera.scale.x,
-        bottom + position.y * camera.scale.y,
-    )
+// // https://stackoverflow.com/a/65437868
+// // TODO: Understand how this works. Assess if necessary.
+// AI-generated code to convert from 2d cameras to 3d. Claude 3.5 Sonnet
+fn window_to_world(window: &Window, camera_transform: &Transform, cursor_pos: &Vec2) -> Vec2 {
+    // Convert screen position to normalized device coordinates (NDC)
+    let ndc_x = (2.0 * cursor_pos.x) / window.width() - 1.0;
+    let ndc_y = 1.0 - (2.0 * cursor_pos.y) / window.height();
+
+    // Convert to view space
+    let view_x = ndc_x;
+    let view_y = ndc_y;
+    let view_z = 1.0; // Project onto the far plane
+
+    // Convert to world space
+    let camera_forward = camera_transform.forward();
+    let camera_right = camera_transform.right();
+    let camera_up = camera_transform.up();
+
+    let world_pos = camera_transform.translation
+        + camera_right * view_x
+        + camera_up * view_y
+        + camera_forward * view_z;
+
+    // Calculate intersection with XZ plane (Y = 0)
+    let ray_direction = (world_pos - camera_transform.translation).normalize();
+    let t = -camera_transform.translation.y / ray_direction.y;
+    let intersection = camera_transform.translation + ray_direction * t;
+
+    // Return XZ coordinates as Vec2
+    Vec2::new(intersection.x, intersection.z)
 }
