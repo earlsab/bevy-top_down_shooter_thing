@@ -6,6 +6,9 @@ use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 const STARTING_CAMERA_DISTANCE: f32 = 30.0;
+const MAXIMUM_CAMERA_DISTANCE: f32 = 60.0;
+const MINIMUM_CAMERA_DISTANCE: f32 = 10.0;
+
 #[derive(Component)]
 struct Camera;
 
@@ -30,6 +33,7 @@ impl Plugin for CameraPlugin {
 }
 
 fn spawn_camera(mut commands: Commands) {
+    assert!(MAXIMUM_CAMERA_DISTANCE > MINIMUM_CAMERA_DISTANCE);
     commands.spawn(
         // Camera3dBundle was depreciated.
         CameraBundle {
@@ -55,7 +59,7 @@ fn look_around_mouse(
     let action_state = query_player.single();
     let camera_pan_vector = action_state.axis_pair(&PlayerAction::Look);
     const CAMERA_PAN_RATE: f32 = 0.05;
-    info!("CAMERA LOOK VECTOR {:?}", camera_pan_vector);
+    // info!("CAMERA LOOK VECTOR {:?}", camera_pan_vector);
     if (action_state.pressed(&PlayerAction::AllowLook)) {
         camera_transform.translation.x += CAMERA_PAN_RATE * camera_pan_vector.x;
         camera_transform.translation.z += CAMERA_PAN_RATE * camera_pan_vector.y;
@@ -63,18 +67,43 @@ fn look_around_mouse(
 }
 
 fn zoom_control(
-    mut query_camera: Query<&mut Velocity, With<Camera>>,
+    mut query_camera: Query<(&Transform, &mut Velocity), With<Camera>>,
     query_player: Query<&ActionState<PlayerAction>, (With<Player>, Without<Camera>)>, // w/o cam: https://bevyengine.org/learn/errors/b0001/
 ) {
     const CAMERA_ZOOM_RATE: f32 = 3.0; // has to be small number
-    let mut camera_height = query_camera.single_mut();
+    let (camera_height, mut camera_height_velocity) = query_camera.single_mut();
     let action_state = query_player.single();
 
     let zoom_delta = action_state.value(&PlayerAction::Zoom);
     // Negative = Zoom In
     // Positive = Zoom Out
-    info!("ZOOM DELTA {:?}", zoom_delta);
-    camera_height.linvel.y = zoom_delta * CAMERA_ZOOM_RATE;
+    // info!("ZOOM DELTA {:?}", zoom_delta);
+
+    let mut max_excess_distance = camera_height.translation.y - MAXIMUM_CAMERA_DISTANCE;
+    max_excess_distance = max_excess_distance.round();
+    // e.g.
+    // min 30 - 0 = 30
+    // min -30 - (-)60 =
+    let mut min_excess_distance = MINIMUM_CAMERA_DISTANCE - camera_height.translation.y;
+    min_excess_distance = min_excess_distance.round();
+
+    // info!("CAMERA HEIGHT {:?}", camera_height.translation.y);
+    // info!("Min Ex {:?}", min_excess_distance);
+    // info!("Max Ex {:?}", max_excess_distance);
+
+    // If > 0 = exceeded max or min
+    // info!("max_excess_distance {:?}", max_excess_distance);
+    // info!("min_excess_distance {:?}", min_excess_distance);
+    if min_excess_distance <= 0.0 && max_excess_distance <= 0.0 {
+        camera_height_velocity.linvel.y = zoom_delta * CAMERA_ZOOM_RATE;
+    } else {
+        // Too zoomed out
+        if max_excess_distance > 0.0 {
+            camera_height_velocity.linvel.y = -max_excess_distance * CAMERA_ZOOM_RATE * 2.0;
+        } else if min_excess_distance > 0.0 {
+            camera_height_velocity.linvel.y = min_excess_distance * CAMERA_ZOOM_RATE * 2.0;
+        }
+    }
 }
 
 fn follow_player(
