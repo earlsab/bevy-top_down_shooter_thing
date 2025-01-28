@@ -33,7 +33,7 @@ impl Plugin for CameraPlugin {
 }
 
 fn spawn_camera(mut commands: Commands) {
-    assert!(MAXIMUM_CAMERA_DISTANCE > MINIMUM_CAMERA_DISTANCE);
+    // assert!(MAXIMUM_CAMERA_DISTANCE > MINIMUM_CAMERA_DISTANCE);
     commands.spawn(
         // Camera3dBundle was depreciated.
         CameraBundle {

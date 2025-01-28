@@ -194,7 +194,7 @@ fn cursor_position(
     let (camera_transform, _camera) = q_camera.single();
     // Games typically only have one window (the primary window)
     if let Some(position) = window.cursor_position() {
-        world_cursor_position.position = window_to_world(&window, &camera_transform, &position);
+        world_cursor_position.position = window_to_world(window, camera_transform, &position);
         // info!("{:?}", world_cursor_position.position);
     } else {
         // println!("Cursor is not in the game window.");
