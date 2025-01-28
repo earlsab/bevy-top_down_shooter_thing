@@ -1,14 +1,9 @@
-use std::f32::consts::PI;
-
 use crate::movement::Velocity;
-use bevy::ecs::world;
-use bevy::math::vec2;
 use bevy::prelude::*;
-use bevy::render::view::window;
 use bevy::window::PrimaryWindow;
 use leafwing_input_manager::prelude::*;
 
-const PLAYER_ROTATE_RATE: f32 = 0.5;
+// const PLAYER_ROTATE_RATE: f32 = 0.5;
 
 #[derive(Component, Debug)]
 pub struct CursorPosition {
@@ -122,36 +117,30 @@ impl Plugin for PlayerPlugin {
 fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
+    _meshes: ResMut<Assets<Mesh>>,
 ) {
-    commands.spawn(
-        (
-            PlayerBundle {
-                // Depreciated Spatial Bundle. See https://thisweekinbevy.com/issue/2024-10-21-async-assets-mesh-picking-and-the-bevy-linter
-                spatial: (
-                    Transform::IDENTITY, // setting allows model to show up at startup. setting to 0 makes model disappear until movement
-                    Visibility::Visible,
-                ),
-                velocity: {
-                    Velocity {
-                        linvel: Vec3::ZERO,
-                        angvel: Quat::IDENTITY,
-                    }
-                },
-                // SceneBundle -> SceneRoot https://bevyengine.org/learn/migration-guides/0-14-to-0-15/#migrate-scenes-to-required-components
-                model: SceneRoot(asset_server.load("Christmas Tree.glb#Scene0")),
-                marker: Player,
-                input_manager: InputManagerBundle::with_map(PlayerBundle::default_input_map()),
-                world_cursor_position: {
-                    CursorPosition {
-                        position: Vec2::ZERO,
-                    }
-                },
-            }
-            // TODO: Add directional marker for forward facing direction for debugging
-            // .insert(meshes.add(Cuboid::default()))),
+    commands.spawn(PlayerBundle {
+        // Depreciated Spatial Bundle. See https://thisweekinbevy.com/issue/2024-10-21-async-assets-mesh-picking-and-the-bevy-linter
+        spatial: (
+            Transform::IDENTITY, // setting allows model to show up at startup. setting to 0 makes model disappear until movement
+            Visibility::Visible,
         ),
-    );
+        velocity: {
+            Velocity {
+                linvel: Vec3::ZERO,
+                angvel: Quat::IDENTITY,
+            }
+        },
+        // SceneBundle -> SceneRoot https://bevyengine.org/learn/migration-guides/0-14-to-0-15/#migrate-scenes-to-required-components
+        model: SceneRoot(asset_server.load("Christmas Tree.glb#Scene0")),
+        marker: Player,
+        input_manager: InputManagerBundle::with_map(PlayerBundle::default_input_map()),
+        world_cursor_position: {
+            CursorPosition {
+                position: Vec2::ZERO,
+            }
+        },
+    });
 }
 
 fn player_movement(
@@ -177,12 +166,12 @@ fn player_rotates_to_mouse_cursor(
     // TODO: Not sure why action needs to be called with crate::
     mut query: Query<(&mut Transform, &mut Velocity, &CursorPosition), With<Player>>,
 ) {
-    let (mut player_transform, mut player_velocity, world_cursor_position) = query.single_mut();
+    let (mut player_transform, _player_velocity, world_cursor_position) = query.single_mut();
     // Still can't understand why this isn't working.
     // TODO: Allow Player to Rotate to Mouse Cursor
     // player_transform.rotate_y(0.005);
 
-    let player_pos = player_transform.translation.truncate();
+    let _player_pos = player_transform.translation.truncate();
     let world_cursor_pos: Vec3 = Vec3::new(
         world_cursor_position.position.x,
         0.0,
@@ -202,7 +191,7 @@ fn cursor_position(
 ) {
     let mut world_cursor_position = query_player.single_mut();
     let window = q_windows.single();
-    let (camera_transform, camera) = q_camera.single();
+    let (camera_transform, _camera) = q_camera.single();
     // Games typically only have one window (the primary window)
     if let Some(position) = window.cursor_position() {
         world_cursor_position.position = window_to_world(&window, &camera_transform, &position);

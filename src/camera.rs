@@ -60,7 +60,7 @@ fn look_around_mouse(
     let camera_pan_vector = action_state.axis_pair(&PlayerAction::Look);
     const CAMERA_PAN_RATE: f32 = 0.05;
     // info!("CAMERA LOOK VECTOR {:?}", camera_pan_vector);
-    if (action_state.pressed(&PlayerAction::AllowLook)) {
+    if action_state.pressed(&PlayerAction::AllowLook) {
         camera_transform.translation.x += CAMERA_PAN_RATE * camera_pan_vector.x;
         camera_transform.translation.z += CAMERA_PAN_RATE * camera_pan_vector.y;
     }

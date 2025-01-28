@@ -12,7 +12,6 @@ use bevy::{
 
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use camera::CameraPlugin;
-use debug::DebugPlugin;
 use enemies::EnemyPlugin;
 use leafwing_input_manager::prelude::*;
 use movement::MovementPlugin;
